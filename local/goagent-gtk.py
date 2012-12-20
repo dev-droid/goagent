@@ -31,7 +31,7 @@ class GoAgentAppIndicator:
         self.ind = appindicator.Indicator("GoAgent", "indicator-messages", appindicator.CATEGORY_APPLICATION_STATUS)
         self.ind.set_status(appindicator.STATUS_ACTIVE)
         self.ind.set_attention_icon("indicator-messages-new")
-        self.ind.set_icon(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logo.png'))
+        self.ind.set_icon('logo.png')
 
         self.menu = gtk.Menu()
 

@@ -299,7 +299,7 @@ class CertUtil(object):
     @staticmethod
     def check_ca():
         #Check CA exists
-        capath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'CA.key')
+        capath = 'CA.key'
         if not os.path.exists(capath):
             if not OpenSSL:
                 logging.critical('CA.key is not exist and OpenSSL is disabled, ABORT!')
@@ -315,7 +315,7 @@ class CertUtil(object):
         if cmd and os.system(cmd) != 0:
             logging.warning('GoAgent install trusted root CA certificate failed, Please run goagent by administrator/root.')
             #Check Certs Dir
-        certdir = os.path.join(os.path.dirname(__file__), 'certs')
+        certdir = 'certs'
         if not os.path.exists(certdir):
             os.makedirs(certdir)
 
@@ -654,7 +654,7 @@ class Common(object):
         """load config from proxy.ini"""
         ConfigParser.RawConfigParser.OPTCRE = re.compile(r'(?P<option>[^=\s][^=]*)\s*(?P<vi>[=])\s*(?P<value>.*)$')
         self.CONFIG = ConfigParser.ConfigParser()
-        self.CONFIG.read(os.path.join(os.path.dirname(__file__), __config__))
+        self.CONFIG.read(__config__)
 
         self.LISTEN_IP            = self.CONFIG.get('listen', 'ip')
         self.LISTEN_PORT          = self.CONFIG.getint('listen', 'port')
@@ -778,9 +778,6 @@ class Common(object):
             info += 'CRLF Injection     : %s\n' % '|'.join(self.CRLF_SITES)
         info += '------------------------------------------------------\n'
         return info
-
-common = Common()
-http   = Http(max_window=common.GAE_WINDOW, proxy_uri=common.proxy_uri)
 
 def gae_urlfetch(method, url, headers, payload, fetchserver, **kwargs):
     # deflate = lambda x:zlib.compress(x)[2:-4]
@@ -1568,7 +1565,7 @@ def pacserver_handler(sock, address, hls={}):
             return rfile.close()
         raise
 
-    filename = os.path.join(os.path.dirname(__file__), common.PAC_FILE)
+    filename = common.PAC_FILE
     if 'mtime' not in hls:
         hls['mtime'] = os.path.getmtime(filename)
     if time.time() - hls['mtime'] > 60*60*12:
@@ -1679,6 +1676,11 @@ def main():
     if os.path.islink(__file__):
         __file__ = getattr(os, 'readlink', lambda x:x)(__file__)
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+    global common, http
+    common = Common()
+    http   = Http(max_window=common.GAE_WINDOW, proxy_uri=common.proxy_uri)
+
     logging.basicConfig(level=logging.DEBUG if common.LISTEN_DEBUGINFO else logging.INFO, format='%(levelname)s - %(asctime)s %(message)s', datefmt='[%b %d %H:%M:%S]')
     CertUtil.check_ca()
     pre_start()
